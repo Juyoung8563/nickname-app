@@ -20,7 +20,7 @@ public class MainController {
 
     @GetMapping
     public String root(Model model) throws Exception {
-        List<Account> accounts = accountRepository.findAll();
+        List<String> accounts = accountRepository.findAll();
         model.addAttribute("accounts", accounts);
         return "main";
     }

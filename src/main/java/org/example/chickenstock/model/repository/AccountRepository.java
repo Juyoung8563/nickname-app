@@ -5,6 +5,7 @@ import org.example.chickenstock.model.dto.Account;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -17,19 +18,25 @@ public class AccountRepository implements JDBCRepository {
     final String USER = dotenv.get("DB_USER");
     final String PASSWORD = dotenv.get("DB_PASSWORD");
 
-    public List<Account> findAll() throws Exception {
-        List<Account> accounts = new ArrayList<>();
+    public List<String> findAll() throws Exception {
+        List<String> accounts = new ArrayList<>();
         try (Connection conn = getConnection(URL, USER, PASSWORD)) {
-            Statement stmt = conn.createStatement(); // PreparedStatement로 왜 안 만듦?
-            String query = "SELECT * FROM accounts ORDER BY account_id";
-//            String query = "SELECT * FROM accounts ORDER BY account_id";
-            ResultSet rs = stmt.executeQuery(query);
+
+            String query = "SELECT account_id, nickname FROM accounts ORDER BY account_id";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                accounts.add(new Account(rs.getLong("account_id"), rs.getString("nickname")));
+                String formatted = String.format("ID: %d, 닉네임: %s",
+                        rs.getLong("account_id"),
+                        rs.getString("nickname"));
+
+                accounts.add(formatted);
             }
         }
         return accounts;
     }
+
 
     public void save(Account account) throws Exception {
         try (Connection conn = getConnection(URL, USER, PASSWORD)) {
